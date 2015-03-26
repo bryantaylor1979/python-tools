@@ -1,10 +1,11 @@
 import subprocess 
 import os
 import time
+import argparse
 
 # Variables
-enable_sub_folder = True
-folder_name = 'Shared Videos' # 'Shared Videos' | 'SelfBuild' | 'Shared Music' | 'Backup' 
+disable_sub_folder = False
+folder_name = 'Shared Videos' # 'Shared Videos' | 'SelfBuild' | 'Shared Music' | 'Backup'
 ftp_server = 'cambslogic.com'
 ftp_user = 'bryan'
 ftp_pass = 'tango224'
@@ -23,12 +24,12 @@ filesinparallel = 2 # transfer 2 files in parallel (totalling 6 TCP connections)
 if dryrun == True:
   loop = False
 
-def mirror(reverse_mirror):
+def mirror(reverse_mirror,args):
   # Main Code
   t = time.time()
-  if enable_sub_folder == True:
-     dest_folder_on_ftp_server = os.path.join('/mnt/cambs_cloud',folder_name)
-     src_local_folder = os.path.join('/Public',folder_name)
+  if args.disable_sub_folder == False:
+     dest_folder_on_ftp_server = os.path.join('/mnt/cambs_cloud',args.folder_name)
+     src_local_folder = os.path.join('/Public',args.folder_name)
   else:
      dest_folder_on_ftp_server = '/mnt/cambs_cloud'
      src_local_folder = '/Public'
@@ -43,18 +44,18 @@ def mirror(reverse_mirror):
      r_string = ''
   
   # verbose string
-  if verbose_level == 0:
+  if args.verbose_level == 0:
      verbose_string = '-v'
   else: 
-     verbose_string = '--verbose='+str(verbose_level)
+     verbose_string = '--verbose='+str(args.verbose_level)
 
   # dry run string
-  if dryrun == True:
+  if args.dryrun == True:
      dryrun_string = '  --dry-run'
   else:
      dryrun_string = ''
 
-  if loop == True:
+  if args.loop == True:
      loop_string = ' --loop'
   else: 
      loop_string = ''
@@ -67,26 +68,60 @@ def mirror(reverse_mirror):
   elapsed = time.time() - t
   print elapsed
 
-def 
+def parseinputs():
+  folder_name_choices =  ['Shared Videos', 'SelfBuild', 'Shared Music', 'Backup']
   parser = argparse.ArgumentParser(description='variables')
-  parser.add_argument('--foldername', metavar='N', type=int, nargs='+',
-                       help='an integer for the accumulator')
-  parser.add_argument('--sum', dest='accumulate', action='store_const',
-                       const=sum, default=max,
-                       help='sum the integers (default: find the max)')
-
-args = parser.parse_args()
+  parser.add_argument( '-f','--folder_name', 
+                       default=folder_name, type=str, 
+                       choices=folder_name_choices,
+                       help='folder name to be syncronised')
+  parser.add_argument( '-e','--disable_sub_folder',
+                       default=disable_sub_folder, action='store_true', 
+                       help='disable to sync everything in one shot')
+  parser.add_argument( '-s','--ftp_server',
+                       default=ftp_server, type=str, 
+                       help='url address of remote ftp server')
+  parser.add_argument( '-u','--ftp_user',
+                       default=ftp_user, type=str, 
+                       help='username for ftp login')
+  parser.add_argument( '-p','--ftp_pass',
+                       default=ftp_pass, type=str, 
+                       help='password for ftp login')
+  parser.add_argument( '-c','--protocol',
+                       default=protocol, type=str, 
+                       help='password for ftp login')
+  parser.add_argument( '-v','--verbose_level',
+                       default=verbose_level, type=int, 
+                       help='verbose logging level')
+  parser.add_argument( '-m','--mode',
+                       default=mode, type=str, 
+                       help='mode reverse/mirror/bi-direction')
+  parser.add_argument( '-d','--dryrun',
+                       default=dryrun, action='store_true',
+                       help='will not transfer any files but will have logging as if it was trying')
+  parser.add_argument( '-l','--loop',
+                       default=loop, action='store_true',
+                       help='ill be force disable if dry-run is enabled as it may go into a continuous loop.')
+  parser.add_argument( '-t','--use_pget_n',
+                       default=use_pget_n, type=int, 
+                       help='transfer each file with 3 independent parallel TCP connections')
+  parser.add_argument( '-i','--filesinparallel',
+                       default=filesinparallel, type=int, 
+                       help='transfer 2 files in parallel (totalling 6 TCP connections)')
+  args = parser.parse_args()
+  return args
 
 def run():
-  if mode == 'reverse':
-     mirror(True)
-  elif mode == 'mirror':
-     mirror(False)
+  args = parseinputs()
+  if args.mode == 'reverse':
+     mirror(True,args)
+  elif args.mode == 'mirror':
+     mirror(False,args)
   else: # bi-directional
      print "mirror"
-     mirror(False)
+     mirror(False,args)
      print "reverse-mirror"
-     mirror(True)
+     mirror(True,args)
 
 if __name__ == "__main__":
   run()
