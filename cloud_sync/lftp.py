@@ -67,6 +67,16 @@ def mirror(reverse_mirror):
   elapsed = time.time() - t
   print elapsed
 
+def 
+  parser = argparse.ArgumentParser(description='variables')
+  parser.add_argument('--foldername', metavar='N', type=int, nargs='+',
+                       help='an integer for the accumulator')
+  parser.add_argument('--sum', dest='accumulate', action='store_const',
+                       const=sum, default=max,
+                       help='sum the integers (default: find the max)')
+
+args = parser.parse_args()
+
 def run():
   if mode == 'reverse':
      mirror(True)
