@@ -19,6 +19,9 @@ loop = True # will be force disable if dry-run is enabled as it may go into a co
 use_pget_n = 3  #  transfer each file with 3 independent parallel TCP connections
 filesinparallel = 2 # transfer 2 files in parallel (totalling 6 TCP connections)
 
+# should make it run a little quicker by dismissing file not required for sync.
+exclude = ['.svn/','.shareport/']
+
 
 # will be force disable if dry-run is enabled as it may go into a continuous loop.
 if dryrun == True:
@@ -45,9 +48,13 @@ def mirror(reverse_mirror,args):
   
   # verbose string
   if args.verbose_level == 0:
-     verbose_string = '-v'
+     verbose_string = ' -v'
   else: 
-     verbose_string = '--verbose='+str(args.verbose_level)
+     verbose_string = ' --verbose='+str(args.verbose_level)
+
+  exclude_string = ''
+  for string in exclude: 
+     exclude_string = exclude_string+' --exclude-glob '+string
 
   # dry run string
   if args.dryrun == True:
@@ -60,7 +67,7 @@ def mirror(reverse_mirror,args):
   else: 
      loop_string = ''
 
-  string = 'lftp '+protocol+'://'+ftp_user+':'+ftp_pass+'@'+ftp_server+' -e "mirror '+verbose_string+r_string+dryrun_string+' --parallel='+str(filesinparallel)+' --use-pget-n='+str(use_pget_n)+' -c'+loop_string+' --only-newer --ignore-time '+"'"+src_local_folder+"'"+' '+"'"+dest_folder_on_ftp_server+"'"+' ; quit"'
+  string = 'lftp '+protocol+'://'+ftp_user+':'+ftp_pass+'@'+ftp_server+' -e "mirror '+exclude_string+verbose_string+r_string+dryrun_string+' --parallel='+str(filesinparallel)+' --use-pget-n='+str(use_pget_n)+' -c'+loop_string+' --only-newer --ignore-time '+"'"+src_local_folder+"'"+' '+"'"+dest_folder_on_ftp_server+"'"+' ; quit"'
 
   print string
   subprocess.call(string, shell=True)
