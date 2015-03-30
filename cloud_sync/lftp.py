@@ -13,7 +13,7 @@ protocol = 'ftp' # sftp or ftp
 verbose_level = 0
 mode = 'bi-directional' # reverse | mirror | bi-directional
 dryrun = False
-loop = True # will be force disable if dry-run is enabled as it may go into a continuous loop.
+loop = False # will be force disable if dry-run is enabled as it may go into a continuous loop.
 
 # You can play with values for --use-pget-n and/or -P to achieve maximum speed depending on the particular network.
 use_pget_n = 3  #  transfer each file with 3 independent parallel TCP connections
