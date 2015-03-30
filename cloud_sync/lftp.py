@@ -20,7 +20,7 @@ use_pget_n = 3  #  transfer each file with 3 independent parallel TCP connection
 filesinparallel = 2 # transfer 2 files in parallel (totalling 6 TCP connections)
 
 # should make it run a little quicker by dismissing file not required for sync.
-exclude = ['.svn/','.shareport/']
+exclude = ['.svn/','.shareport/','.*'] # .* tries to remove all hidden files
 
 
 # will be force disable if dry-run is enabled as it may go into a continuous loop.
