@@ -76,7 +76,7 @@ def mirror(reverse_mirror,args):
   print elapsed
 
 def parseinputs():
-  folder_name_choices =  ['Shared Videos', 'SelfBuild', 'Shared Music', 'Backup']
+  folder_name_choices =  ['Shared Videos', 'SelfBuild', 'Shared Music', 'Backup', 'Shared Pictures']
   parser = argparse.ArgumentParser(description='variables')
   parser.add_argument( '-f','--folder_name', 
                        default=folder_name, type=str, 
