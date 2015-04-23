@@ -5,11 +5,11 @@ import os
 import argparse
 
 # Variables
-folder_name = 'Shared Software' # 'Shared Videos' | 'SelfBuild' | 'Shared Music' | 'Backup' | 'Shared Pictures'
+folder_name = 'Shared Videos' # 'Shared Videos' | 'SelfBuild' | 'Shared Music' | 'Backup' | 'Shared Pictures'
 ssh_server = 'cambslogic.com'
 ssh_user = 'bryant'
 ssh_pass = 'tango224'
-verbose_level = 0
+verbose_level = 1
 mode = 'bi-directional' # reverse | mirror | bi-directional
 
 # should make it run a little quicker by dismissing file not required for sync.
@@ -19,7 +19,11 @@ exclude = ['.svn/','.shareport/','.*'] # .* tries to remove all hidden files
 def rsync(args):
   folder_name_=folder_name.replace(' ','\ ')
   print folder_name_
-  string = 'rsync --partial --progress --recursive --rsh=ssh '+ssh_user+'@'+ssh_server+':"/mnt/kinners_cloud/'+folder_name_+'/" /mnt/cambs_cloud/'+folder_name_+'/'
+  if verbose_level==0:
+	verbose = ''
+  else:
+	verbose = ' -v'
+  string = 'rsync --partial --ignore-existing --progress'+verbose+' --recursive --rsh=ssh '+ssh_user+'@'+ssh_server+':"/mnt/kinners_cloud/'+folder_name_+'/" /mnt/cambs_cloud/'+folder_name_+'/'
   print string
   subprocess.call(string, shell=True)
 

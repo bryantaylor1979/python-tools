@@ -1,5 +1,3 @@
-# TODO: Try polling so you can get other tasks running quicker
-# TODO: Try polling so you can add a time out
 # TODO: Add AWS node
 # TODO: Add cambridge laptop as a node. 
 # TODO: Get the upbeat machine running in kinross. 
@@ -8,11 +6,15 @@
 # create nodes
 import run_slave_command as configured_node
 from collections import namedtuple
+from string import whitespace
+import time
+import os
 
 # Define class
 NodeList = [];
 ProcessList = [];
 ErrorCodeList = [];
+count = 0;
 params = namedtuple('params', [ 'hostname', 
                                 'EnableForwarding',
 			        'password', 
@@ -56,21 +58,49 @@ def run_slave_node(nodedef):
    process = configured_node.run();
    return process
 
+def process_communicate(single_process):
+   out, err = single_process.communicate();
+   out=out.replace("\n\r", "")
+   out=out.replace("\n",   "")
+   out=out.replace("\r\n", "")
+   return out, err
+
+
 if __name__ == "__main__":
    for node in NodeList:
       process = run_slave_node(node)
       ProcessList.append(process)
+   timeout = 10;
+   tic = time.time()
 
    # wait for nodes to finish
-   for single_process in ProcessList:
-      	error_code = single_process.wait();
-      	out, err = single_process.communicate();
-      	#print "std out: "+out
-   	if error_code == 0: 
-      		print out.replace("\r\n", "")+": Success"
-   	else:
-      		print out.replace("\r\n", "")+": Failed"
-
-#retcode = p.poll()
-#if retcode is not None:
-   # process has terminated
+   NumberOfProcesses = len(ProcessList)
+   print "NumberOfProcesses: "+str(NumberOfProcesses)
+   while True:
+      for single_process in ProcessList:
+          #error_code = single_process.wait();
+          retcode = single_process.poll()
+          time.sleep(1)
+          if retcode is not None:
+             # process has terminated
+             count=count+1
+             out, err = process_communicate(single_process);
+             print "Computer Name: "+out
+             if retcode == 0: 
+	        print "Test Result: PASS\n\r"
+             else:
+                print "Test Result: FAIL\n\r"
+          toc = time.time();
+          time_elasped = toc-tic;
+          if timeout < time_elasped:
+	     print "Test Result: FAIL (timeout)\n\r"
+             count=count+1
+             try:
+                single_process.kill();
+             except:
+                print "could not kill process"
+          if count==NumberOfProcesses:
+	     break
+      if count==NumberOfProcesses:
+          print "all tasks finished"
+	  break
